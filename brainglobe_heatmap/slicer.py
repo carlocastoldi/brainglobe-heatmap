@@ -102,7 +102,7 @@ class Slicer:
         """
         regions = regions + [root]
 
-        projected: Dict[str, np.ndarray] = self.plane0.get_projections(regions)
+        projected: Dict[str, np.ndarray] = self.plane0.get_projections(regions, transform=True)
 
         # get output coordinates
         coordinates: Dict[str, List[np.ndarray]] = dict()
@@ -122,7 +122,7 @@ class Slicer:
         to the brainrender scene.
         """
         for region in regions + [root]:
-            intersection = self.plane0.intersect_with(region._mesh)
+            intersection = self.plane0.intersect_with(region._mesh, transform=True)
 
             if len(intersection.vertices):
                 scene.add(intersection, transform=False)
@@ -132,7 +132,7 @@ class Slicer:
 
     def slice_scene(self, scene: Scene, regions: List[Actor]):
         """
-        Slices the meshes in a 3D brainrender scene using the gien planes
+        Slices the meshes in a 3D brainrender scene using the given planes
         """
         # slice the scene
         for _, plane in enumerate((self.plane0, self.plane1)):

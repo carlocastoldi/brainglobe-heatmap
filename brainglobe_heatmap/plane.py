@@ -56,26 +56,33 @@ class Plane:
     def center_of_mass(self):
         return self.center
 
-    def p3_to_p2(self, ps):
+    def _transform_center(self):
+        center = self.center.copy()
+        center[2] *= -1
+        return center
+
+    def p3_to_p2(self, ps, transform: bool=True):
         # ps is a list of 3D points
         # returns a list of 2D point mapped on
         # the plane (u -> x axis, v -> y axis)
-        return (ps - self.center) @ self.M
+        center = self._transform_center() if transform else self.center
+        return (ps - center) @ self.M
 
-    def intersect_with(self, mesh: vd.Mesh):
+    def intersect_with(self, mesh: vd.Mesh, transform: bool=False):
+        center = self._transform_center() if transform else self.center
         return mesh.intersect_with_plane(
-            origin=self.center, normal=self.normal
+            origin=center, normal=self.normal
         )
 
     # for Slicer.get_structures_slice_coords()
-    def get_projections(self, actors: List[Actor]) -> Dict[str, np.ndarray]:
+    def get_projections(self, actors: List[Actor], transform: bool=False) -> Dict[str, np.ndarray]:
         projected = {}
         for actor in actors:
             mesh: vd.Mesh = actor._mesh
-            intersection = self.intersect_with(mesh)
+            intersection = self.intersect_with(mesh, transform=transform)
             if not intersection.vertices.shape[0]:
                 continue
-            pieces = intersection.split()  # intersection.split() in newer vedo
+            pieces = intersection.split()
             for piece_n, piece in enumerate(pieces):
                 # sort coordinates
                 points = piece.join(reset=True).vertices
