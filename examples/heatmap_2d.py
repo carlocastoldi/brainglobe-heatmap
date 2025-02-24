@@ -2,7 +2,12 @@
     This example shows how to use visualize a heatmap in 2D
 """
 
+from brainrender import settings
+
 import brainglobe_heatmap as bgh
+
+settings.SHOW_AXES = True
+settings.SHADER_STYLE = "cartoon"
 
 values = dict(  # scalar values for each region
     TH=1,
@@ -21,15 +26,40 @@ values = dict(  # scalar values for each region
     HIP=3,
     PA=-4,
 )
+ 
+position = 3000
+orientation = "sagittal"
+# orientation = "frontal"
+# orientation = "horizontal"
 
-
-f = bgh.Heatmap(
+bgh.plan(
     values,
-    # when using a named orientation, you can pass a single value!
-    position=5000,
-    # 'frontal' or 'sagittal,' or 'horizontal' or a tuple (x,y,z)
-    orientation="frontal",
-    title="horizontal view",
+    atlas_name="allen_mouse_25um",
+    position=position, 
+    orientation=orientation,
+    thickness=1000, # thickness of the slices used for rendering (in microns)
+    arrow_scale=750,
+    vmin=-5,
+    vmax=3,
+).show()
+ 
+bgh.Heatmap(
+    values,
+    atlas_name="allen_mouse_25um",
+    position=position, 
+    orientation=orientation,
+    thickness=1000, # thickness of the slices used for rendering (in microns)
+    vmin=-5,
+    vmax=3,
+    # format="2D",
+).show()
+
+bgh.Heatmap(
+    values,
+    atlas_name="allen_mouse_25um",
+    position=position, 
+    orientation=orientation,
+    thickness=1000, # thickness of the slices used for rendering (in microns)
     vmin=-5,
     vmax=3,
     format="2D",

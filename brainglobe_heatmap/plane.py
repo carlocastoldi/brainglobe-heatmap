@@ -24,6 +24,9 @@ class Plane:
         self.normal = np.cross(self.u, self.v)
         self.M = np.vstack([u, v]).T
 
+        self.transformed_center = self.center.copy()
+        self.transformed_center[2] *= -1
+
     @staticmethod
     def from_norm(origin: np.ndarray, norm: np.ndarray):
         u = np.zeros(3)
@@ -56,20 +59,18 @@ class Plane:
     def center_of_mass(self):
         return self.center
 
-    def _transform_center(self):
-        center = self.center.copy()
-        center[2] *= -1
-        return center
+    def transformed(self):
+        return Plane(self.transformed_center, self.u, self.v)
 
     def p3_to_p2(self, ps, transform: bool=True):
         # ps is a list of 3D points
         # returns a list of 2D point mapped on
         # the plane (u -> x axis, v -> y axis)
-        center = self._transform_center() if transform else self.center
+        center = self.transformed_center if transform else self.center
         return (ps - center) @ self.M
 
     def intersect_with(self, mesh: vd.Mesh, transform: bool=False):
-        center = self._transform_center() if transform else self.center
+        center = self.transformed_center if transform else self.center
         return mesh.intersect_with_plane(
             origin=center, normal=self.normal
         )

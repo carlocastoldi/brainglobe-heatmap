@@ -56,15 +56,17 @@ class Slicer:
             axidx = get_ax_idx(orientation)
 
             # get the two points the plances are cenered at
-            shift = np.zeros(3)
-            shift[axidx] -= thickness
-            p1 = position - shift
+            p1 = position.copy()
+            p1[axidx] += thickness if axidx != 2 else -thickness
 
             # get the two planes
             # assures that u0×v0 is all-positive -> it's for plane0
-            if orientation == "frontal":
-                u0, v0 = np.array([[0, 0, -1], [0, 1, 0]])
+            if orientation == "frontal": # coordinates in bg are always ASR
+                u0, v0 = np.array([[0, 0, 1], [0, 1, 0]])
             elif orientation == "sagittal":
+                # u0, v0 = np.array([[1, 0, 0], [0, -1, 0]])
+                # or
+                # u0, v0 = np.array([[-1, 0, 0], [0, 1, 0]])
                 u0, v0 = np.array([[1, 0, 0], [0, 1, 0]])
             else:  # orientation == "horizontal"
                 u0, v0 = np.array([[0, 0, 1], [1, 0, 0]])
@@ -135,10 +137,13 @@ class Slicer:
         Slices the meshes in a 3D brainrender scene using the given planes
         """
         # slice the scene
-        for _, plane in enumerate((self.plane0, self.plane1)):
+        plane0 = Actor(self.plane0.transformed(), br_class="plane")
+        plane1 = Actor(self.plane1.transformed(), br_class="plane")
+        # for _, plane in enumerate((plane0, plane1)):
+        for _, plane in enumerate((plane0,)):
             scene.slice(plane, actors=regions, close_actors=True)
 
-        scene.slice(self.plane0, actors=scene.root, close_actors=False)
+        scene.slice(plane0, actors=scene.root, close_actors=False)
 
 
 def get_structures_slice_coords(
